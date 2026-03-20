@@ -1,0 +1,51 @@
+.logoLink {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: flex-end;
+    font-family: var(--cf-title-font)
+}
+
+.logoName {
+    font-weight: 700;
+    font-size: 1.7rem;
+    letter-spacing: 0.5px;
+}
+
+.logoCircle {
+    color: white;
+    font-weight: 600;
+}
+
+.logoHub {
+    font-weight: 700;
+    background: linear-gradient(90deg, #46b6fc, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 8px rgba(107, 184, 255, 0.4);
+    transition: all 0.25s ease;
+}
+
+.logoLink:hover .logoHub {
+    background: linear-gradient(90deg, #9ed0ff, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 12px rgba(107, 184, 255, 0.7);
+}
+
+.navStyle {
+    background-color: var(--cf-theme-850);
+}
+
+.nav-item {
+    --bd-navbar-hover-color: var(--cf-theme-400);
+    --bs-nav-link-hover-color: var(--cf-theme-400);
+}
+
+.dropdown-menu {
+    background-color: var(--cf-theme-900);
+}
+
+.dropdown:has(.nav-link.active) .dropdown-toggle{
+    color: var(--bs-navbar-active-color);
+}
