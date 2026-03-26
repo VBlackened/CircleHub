@@ -15,6 +15,9 @@ namespace CircleHub.Data
 
         public Guid? ProfilePictureId { get; set; }
         public virtual ImageUpload? ProfilePicture { get; set; }
+
+        public virtual ICollection<Contact> Contacts { get; set; } = [];
+        public virtual ICollection<Category> Categories { get; set; } = [];
     }
 
 }

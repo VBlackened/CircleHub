@@ -1,12 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using CircleHub.Data;
-using CircleHub.Client.Models;
-using CircleHub.Helpers;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CircleHub.Models;
+namespace CircleHub.Client.Models;
 
-public class Contact
+public class ContactDTO
 {
     private DateTimeOffset _created;
     private DateTimeOffset? _birthDate;
@@ -67,42 +64,7 @@ public class Contact
         set => _created = value.ToUniversalTime();
     }
 
-    [Required]
-    public string? AppUserId { get; set; }
-    public virtual ApplicationUser? AppUser { get; set; }
+    public string? ProfileImageUrl { get; set; }
 
-    public Guid? ImageId { get; set; }
-    public virtual ImageUpload? Image { get; set; }
-
-    public virtual ICollection<Category> Categories { get; set; } = [];
-
-    public ContactDTO ToDTO()
-    {
-        ContactDTO dto = new ContactDTO
-        {
-            Id = this.Id,
-            FirstName = this.FirstName,
-            LastName = this.LastName,
-            BirthDate = this.BirthDate,
-            Address1 = this.Address1,
-            Address2 = this.Address2,
-            City = this.City,
-            PostalCode = this.PostalCode,
-            Email = this.Email,
-            PhoneNumber = this.PhoneNumber,
-            Created = this.Created,
-            ProfileImageUrl = this.ImageId.HasValue ? $"/uploads/{ImageId}" : ImageHelper.DefaultProfilePictureUrl
-        };
-
-        foreach (Category category in Categories)
-        {
-            //prevent circular reference
-            category.Contacts.Clear();
-            dto.Categories.Add(category.ToDTO());
-        }
-
-        return dto;
-    }
-
-
+    public virtual ICollection<CategoryDTO> Categories { get; set; } = [];
 }
