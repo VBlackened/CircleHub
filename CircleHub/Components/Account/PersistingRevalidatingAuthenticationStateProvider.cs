@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Security.Claims;
-using CircleHub.Client;
+using CircleHub.Client.Models;
 using CircleHub.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -71,17 +71,20 @@ namespace CircleHub.Components.Account
             {
                 var userId = principal.FindFirst(_options.ClaimsIdentity.UserIdClaimType)?.Value;
                 var email = principal.FindFirst(_options.ClaimsIdentity.EmailClaimType)?.Value;
+                var profilePictureUrl = principal.FindFirst(nameof(UserInfo.ProfilePictureUrl))?.Value;
                 var firstName = principal.FindFirst("FirstName")?.Value;
                 var lastName = principal.FindFirst("LastName")?.Value;
 
-                if (userId != null && email != null)
+                if (userId != null && email != null && firstName != null && lastName != null && profilePictureUrl != null)
                 {
                     _state.PersistAsJson(nameof(UserInfo), new UserInfo
                     {
                         UserId = userId,
                         Email = email,
+                        ProfilePictureUrl = profilePictureUrl,
                         FirstName = firstName ?? "",
                         LastName = lastName ?? ""
+
                     });
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using CircleHub.Client.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -21,7 +22,8 @@ namespace CircleHub.Client
                 new Claim(ClaimTypes.Name, userInfo.Email),
                 new Claim(ClaimTypes.Email, userInfo.Email),
                 new Claim("FirstName", userInfo.FirstName),
-                new Claim("LastName", userInfo.LastName)
+                new Claim("LastName", userInfo.LastName),
+                new Claim(nameof(UserInfo.ProfilePictureUrl), userInfo.ProfilePictureUrl)
             ];
 
             authenticationStateTask = Task.FromResult(

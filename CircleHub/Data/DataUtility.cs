@@ -43,10 +43,10 @@ public class DataUtility
 
             if (user == null)
             {
-               await userManager.CreateAsync(demoUser, demoPassword);
+                await userManager.CreateAsync(demoUser, demoPassword);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine("************ ERROR *********");
             Console.WriteLine("ERROR Seeding Demo login user.");
@@ -97,11 +97,11 @@ public class DataUtility
             var mensPics = Directory.GetFiles(Path.Combine(imageDir, "Men/")).ToList();
             var womensPics = Directory.GetFiles(Path.Combine(imageDir, "Women/")).ToList();
 
-            for (int i = 0; i < newContacts.Count; i++ )
+            for (int i = 0; i < newContacts.Count; i++)
             {
                 Contact contact = newContacts[i];
 
-                if (i% 2 == 0)
+                if (i % 2 == 0)
                 {
                     contact.FirstName = faker.Name.FirstName(Bogus.DataSets.Name.Gender.Male);
                     if (mensPics.Count > 0)
@@ -160,7 +160,7 @@ public class DataUtility
                 ];
             context.Categories.AddRange(demoCategories);
         }
-        
+
         foreach (var contact in demoContacts.Where(c => c.Categories.Count == 0))
         {
             int numCategories = rand.Next(1, 5);
