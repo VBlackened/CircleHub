@@ -1,7 +1,10 @@
-using CircleHub.Client.Pages;
+using CircleHub.Client.Components.Pages;
+using CircleHub.Client.Services.Interfaces;
 using CircleHub.Components;
 using CircleHub.Components.Account;
 using CircleHub.Data;
+using CircleHub.Services;
+using CircleHub.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,8 +36,10 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DbConnection") ?? throw new InvalidOperationException("Connection string 'DbConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -44,6 +49,12 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+//Repositories
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+//DTO Services
+builder.Services.AddScoped<ICategoryDTOService, CategoryDTOService>();
 
 var app = builder.Build();
 

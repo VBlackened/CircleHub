@@ -1,0 +1,20 @@
+﻿
+<div class="accordion" id="@_accordionId">
+    @foreach (var category in Categories)
+    {
+        <CategoryAccordionItem @key="category.Id" 
+        Category="category" 
+        parentId="@_accordionId" 
+        OnChange="OnCategoryChange"/>
+    }
+</div>
+
+@code {
+    private string _accordionId = Guid.NewGuid().ToString();
+
+    [Parameter, EditorRequired]
+    public IEnumerable<CategoryDTO> Categories { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public EventCallback<CategoryDTO> OnCategoryChange { get; set; }
+}

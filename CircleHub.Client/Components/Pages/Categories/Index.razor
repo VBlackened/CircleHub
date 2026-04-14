@@ -1,0 +1,56 @@
+﻿@page "/categories"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject ICategoryDTOService CategoryService
+
+<PageTitle>CircleHub | Categories</PageTitle>
+
+<div class="container">
+    <EditForm Model="_newCategory" OnValidSubmit="HandleNewCategory">
+        <DataAnnotationsValidator />
+
+        <ul class="list-group my-3">
+            <li class="list-group-item">
+                <label for="CategoryName" class="form-label">Add a Category</label>
+                <div class="d-flex gap-3">
+                    <InputText @bind-Value="_newCategory.Name" class="form-control" placeholder="Category Name" />
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-floppy"></i>
+                    </button>
+                </div>
+            </li>
+        </ul>
+    </EditForm>
+    <CategoryAccordion Categories="_categories" OnCategoryChange="UpdateCategory" />
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? _authStateTask { get; set; }
+
+    private UserInfo? _userInfo;
+
+    private CategoryDTO _newCategory = new CategoryDTO();
+
+    private IEnumerable<CategoryDTO> _categories = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userInfo = await UserInfoHelper.GetUserInfoAsync(_authStateTask);
+        _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
+    }
+
+    private async Task HandleNewCategory()
+    {
+        await CategoryService.CreateCategoryAsync(_newCategory, _userInfo!.UserId);
+        _newCategory = new CategoryDTO();
+
+        _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
+    }
+
+    private async Task UpdateCategory(CategoryDTO category)
+    {
+        await CategoryService.UpdateCategoryAsync(category, _userInfo!.UserId);
+    }
+}

@@ -1,0 +1,160 @@
+﻿@if (Category is not null)
+{
+    <div class="accordion-item">
+        <div class="accordion-header">
+            @if (_status == Status.Viewing)
+            {
+                <div class="d-lg-flex gap-3 p-3">
+                    <div class="flex-grow-1 hstack gap-2 align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id" aria-expanded="false">
+                        <span class="badge bg-secondary rounded-pill small">
+                            @Category.Contacts.Count
+                        </span>
+                        <span>
+                            @Category.Name
+                        </span>
+                    </div>
+                    <div class="mt-2 mt-lg-0">
+                        <span class="text-nowrap">
+                            <a role="button" class="me-1" @onclick="() => _status = Status.Editing">
+                                <i class="bi bi-pencil-fill" aria-label="Edit Category"></i>
+                            </a>
+                            <a role="button" class="me-1">
+                                <i class="bi bi-trash-fill text-danger" @onclick="() => _status = Status.Deleting" aria-label="Delete Category"></i>
+                            </a>
+                            <a role="button" class="me-1">
+                                <i class="bi bi-eye-fill" aria-label="View Category"></i>
+                            </a>
+                            <a role="button" class="me-1">
+                                <i class="bi bi-envelope-fill" aria-label="Email Category"></i>
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            }
+            else if (_status == Status.Editing)
+            {
+                <EditForm Model="Category" class="d-lg-flex gap-3 p-3 align-itmes-center" OnValidSubmit="HandleEdit">
+                    <div class="flex-grow-1 hstack gap-2 align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id" aria-expanded="false">
+                        <span class="badge bg-secondary rounded-pill small">
+                            @Category.Contacts.Count
+                        </span>
+                        <div class="vstack gap-2 ">
+                            <InputText @bind-Value="Category.Name" class="form-control" placeholder="Category Name" />
+                            <ValidationMessage For="() => Category.Name" />
+                        </div>
+                    </div>
+                    <div class="mt-2 mt-lg-1">
+                        <span class="text-nowrap">
+                            <button class="btn btn-sm btn-success me-1" type="submit">
+                                <i class="bi bi-floppy" aria-label="Save Changes"></i>
+                                Save
+                            </button>
+                            <a role="button" class="btn btn-sm btn-danger" @onclick="CancelEdit">
+                                <i class="bi bi-x" aria-label="Cancel Changes"></i>
+                                Cancel
+                            </a>
+                        </span>
+                    </div>
+
+                </EditForm>
+            }
+            else if (_status == Status.Deleting)
+            {
+                <div class="d-lg-flex gap-3 p-3">
+                    <div class="flex-grow-1 hstack align-itmes-center"
+                         role="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id" aria-label="false">
+                        <span class="badge bg-secondary rounded-pill small">
+                            @Category.Contacts.Count
+                        </span>
+                        <span>
+                            @Category.Name
+                        </span>
+                    </div>
+                    <div class="mt-2 mt-lg-0 text-danger small">
+                        <i class="bi bi-exclamation-triangle-fill" aria-label="Delete Category"></i>
+                        Are you sure you want to delete this category?
+                        <span class="text-nowrap p-1">
+                            <button class="btn btn-sm btn-danger" @onclick="HandleDelete">
+                                <i class="bi bi-trash"></i>
+                                Delete
+                            </button>
+                            <a class="btn btn-sm btn-outline-secondary" role="button" @onclick="() => _status = Status.Viewing">
+                                <i class="bi bi-x" />
+                                Cancel
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            }
+
+        </div>
+        <div id="collapse-@Category.Id" class="accordion-collapse collapse" data-bs-parent="#@parentId">
+            <div class="accordion-body">
+                <ul class="list-group">
+                    <li class="list-group-item text-center lead text-secondary">
+                        No Contacts in this Category
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter, EditorRequired]
+    public string parentId { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public CategoryDTO? Category { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<CategoryDTO> OnChange { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<int> OnDelete { get; set; }
+
+    private enum Status
+    {
+        Viewing,
+        Editing,
+        Deleting
+    }
+
+    private Status _status = Status.Viewing;
+    private string _originalName = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (Category is not null)
+        {
+            _originalName = Category.Name!;
+        }
+    }
+
+    public async Task HandleEdit()
+    {
+        await OnChange.InvokeAsync(Category);
+        _status = Status.Viewing;
+    }
+
+    public async Task HandleDelete()
+    {
+        if (Category is not null)
+        {
+            await OnDelete.InvokeAsync(Category!.Id);
+        }
+
+        _status = Status.Viewing;
+    }
+
+    private void CancelEdit()
+    {
+        if (Category is not null && _originalName != string.Empty)
+        {
+            Category.Name = _originalName;
+        }
+        _status = Status.Viewing;
+    }
+
+}
