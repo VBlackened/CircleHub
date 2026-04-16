@@ -5,7 +5,8 @@
         <CategoryAccordionItem @key="category.Id" 
         Category="category" 
         parentId="@_accordionId" 
-        OnChange="OnCategoryChange"/>
+        OnChange="OnCategoryChange"
+        OnDelete="OnCategoryDelete"/>
     }
 </div>
 
@@ -17,4 +18,7 @@
 
     [Parameter, EditorRequired]
     public EventCallback<CategoryDTO> OnCategoryChange { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<int> OnCategoryDelete { get; set; }
 }

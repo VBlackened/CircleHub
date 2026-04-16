@@ -142,7 +142,7 @@
     {
         if (Category is not null)
         {
-            await OnDelete.InvokeAsync(Category!.Id);
+            await OnDelete.InvokeAsync(Category.Id);
         }
 
         _status = Status.Viewing;

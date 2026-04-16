@@ -1,6 +1,6 @@
 ﻿@page "/categories"
 @attribute [Authorize]
-@rendermode InteractiveServer
+@rendermode InteractiveWebAssembly
 
 @inject ICategoryDTOService CategoryService
 
@@ -22,7 +22,7 @@
             </li>
         </ul>
     </EditForm>
-    <CategoryAccordion Categories="_categories" OnCategoryChange="UpdateCategory" />
+    <CategoryAccordion Categories="_categories" OnCategoryChange="UpdateCategory" OnCategoryDelete="DeleteCategory" />
 </div>
 
 @code {
@@ -52,5 +52,11 @@
     private async Task UpdateCategory(CategoryDTO category)
     {
         await CategoryService.UpdateCategoryAsync(category, _userInfo!.UserId);
+    }
+
+    private async Task DeleteCategory(int categoryId)
+    {
+        await CategoryService.DeleteCategoryAsync(categoryId, _userInfo!.UserId);
+        _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
     }
 }

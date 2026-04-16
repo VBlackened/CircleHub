@@ -13,4 +13,7 @@ public interface ICategoryDTOService
 
     //Update
     Task UpdateCategoryAsync(CategoryDTO category, string userId);
+
+    //Delete
+    Task DeleteCategoryAsync(int id, string userId);
 }
