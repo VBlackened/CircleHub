@@ -16,11 +16,6 @@ public class WASMCategoryDTOService(HttpClient http) : ICategoryDTOService
         return createdCategory ?? throw new HttpRequestException("Invalid JSON response from server.");
     }
 
-    public Task DeleteCategoryAsync(int id, string userId)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<List<CategoryDTO>> GetCategoriesAsync(string userId)
     {
         return await http.GetFromJsonAsync<List<CategoryDTO>>($"api/categories") ?? [];
@@ -31,8 +26,15 @@ public class WASMCategoryDTOService(HttpClient http) : ICategoryDTOService
         throw new NotImplementedException();
     }
 
-    public Task UpdateCategoryAsync(CategoryDTO category, string userId)
+    public async Task UpdateCategoryAsync(CategoryDTO category, string userId)
     {
-        throw new NotImplementedException();
+        HttpResponseMessage response = await http.PutAsJsonAsync($"api/categories/{category.Id}", category);
+        response.EnsureSuccessStatusCode();
+
+    }
+    public async Task DeleteCategoryAsync(int id, string userId)
+    {
+        HttpResponseMessage response = await http.DeleteAsync($"api/categories/{id}");
+        response.EnsureSuccessStatusCode();
     }
 }

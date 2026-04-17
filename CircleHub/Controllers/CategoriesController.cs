@@ -30,7 +30,7 @@ public class CategoriesController(ICategoryDTOService categoryService, UserManag
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
     {
         try
@@ -59,4 +59,40 @@ public class CategoriesController(ICategoryDTOService categoryService, UserManag
             return Problem();
         }
     }
+
+    [HttpPut("{id:int}")]
+    public async Task <ActionResult> UpdateCategory([FromRoute] int id, [FromBody] CategoryDTO category)
+    {
+        if( id != category.Id)
+        {
+            return BadRequest();
+        }
+
+        try
+        {
+            await categoryService.UpdateCategoryAsync(category, _userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return Problem();
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> DeleteCategory([FromRoute]int id)
+    {
+        try
+        {
+            await categoryService.DeleteCategoryAsync(id, _userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return Problem();
+        }
+    }
+
 }
