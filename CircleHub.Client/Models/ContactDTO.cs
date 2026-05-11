@@ -6,7 +6,6 @@ namespace CircleHub.Client.Models;
 public class ContactDTO
 {
     private DateTimeOffset _created;
-    private DateTimeOffset? _birthDate;
 
     public int Id { get; set; }
 
@@ -25,11 +24,7 @@ public class ContactDTO
 
     [Display(Name = "Birthday")]
     [DataType(DataType.Date)]
-    public DateTimeOffset? BirthDate
-    {
-        get => _birthDate;
-        set => _birthDate = value?.ToUniversalTime();
-    }
+    public DateOnly? BirthDate { get; set; }
 
     [Required]
     [Display(Name = "Address")]

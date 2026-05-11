@@ -1,0 +1,152 @@
+﻿@inject ICategoryDTOService CategoryService
+
+@if (Contact is not null)
+{
+    <EditForm Model="Contact" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <div class="row g-3 p-2">
+            <div class="col-12 col-lg-4">
+                <div class="square-img-container">
+                    <img class="square-img" id="contactImage" src="@(string.IsNullOrEmpty(Contact.ProfileImageUrl) ? BrowserFileHelper.DefaultContactImage : Contact.ProfileImageUrl)" />
+                </div>
+                <div>
+                    <InputFile OnChange="OnFileChange" class="form-control mt-2" accept=".png, .jpg, .jpeg, .gif, .svg" />
+                    <span class="text-danger">@_imageError</span>
+                </div>
+            </div>
+            <div class="col-12 col-lg-8">
+                <div class="row g-2">
+                    <div class="col-12 col-lg-6">
+                        <label for="Contact.FirstName" class="form-label">First Name</label>
+                        <InputText class="form-control" @bind-Value="Contact.FirstName" DisplayName="First Name" />
+                        <ValidationMessage For="() => Contact.FirstName" />
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label for="Contact.LastName" class="form-label">Last Name</label>
+                        <InputText class="form-control" @bind-Value="Contact.LastName" DisplayName="Last Name" />
+                        <ValidationMessage For="() => Contact.LastName" />
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label for="Contact.Email" class="form-label">Email</label>
+                        <InputText class="form-control" @bind-Value="Contact.Email" DisplayName="Email" />
+                        <ValidationMessage For="() => Contact.Email" />
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label for="Contact.PhoneNumber" class="form-label">Phone Number</label>
+                        <InputText class="form-control" @bind-Value="Contact.PhoneNumber" DisplayName="Phone Number" />
+                        <ValidationMessage For="() => Contact.PhoneNumber" />
+                    </div>
+                    <div class="col-12">
+                        <label for="Contact.Address1" class="form-label">Address </label>
+                        <InputText class="form-control" @bind-Value="Contact.Address1" DisplayName="Address " />
+                        <ValidationMessage For="() => Contact.Address1" />
+                    </div>
+                    <div class="col-12">
+                        <label for="Contact.Address2" class="form-label">Address 2</label>
+                        <InputText class="form-control" @bind-Value="Contact.Address2" DisplayName="Address 2" />
+                        <ValidationMessage For="() => Contact.Address2" />
+                    </div>
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-12 col-lg-8">
+                                <label for="Contact.City" class="form-label">City</label>
+                                <InputText class="form-control" @bind-Value="Contact.City" DisplayName="City" />
+                                <ValidationMessage For="() => Contact.City" />
+                            </div>
+                            <div class="col-12 col-lg-4">
+                                <label for="Contact.PostalCode" class="form-label">Postal Code</label>
+                                <InputText class="form-control" @bind-Value="Contact.PostalCode" DisplayName="Postal Code" />
+                                <ValidationMessage For="() => Contact.PostalCode" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label for="" class="form-label">Categories</label>
+                        <InputSelect @bind-Value="_selectedCategoryIds" class="form-select">
+                            @foreach (CategoryDTO category in _categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label for="Contact.BrithDate" class="form-label">Birthday</label>
+                        <InputDate @bind-Value="Contact.BirthDate" DisplayName="Birthday" class="form-control" />
+                        <ValidationMessage For="() => Contact.BirthDate" />
+                    </div>
+                    <div class="col-12 d-flex justify-content-end justify-content-stretch gap-3">
+                        <a href="/contacts" class="btn btn-outline-secondary rounded-pill">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public ContactDTO? Contact { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<ContactDTO> OnSubmit { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? _authStateTask { get; set; }
+
+    private UserInfo? _userInfo;
+    private IEnumerable<CategoryDTO> _categories = [];
+    private int[] _selectedCategoryIds = [];
+    private string? _imageError;
+    private IBrowserFile? _selectedImage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Contact ??= new ContactDTO();
+
+        _selectedCategoryIds = [.. Contact.Categories.Select(c => c.Id)];
+
+        try
+        {
+            _userInfo = await UserInfoHelper.GetUserInfoAsync(_authStateTask);
+            _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async Task OnFileChange(InputFileChangeEventArgs changeEvent)
+    {
+        _imageError = null;
+
+        if(changeEvent.File is null)
+        {
+            _selectedImage = null;
+            Contact!.ProfileImageUrl = BrowserFileHelper.DefaultContactImage;
+        }
+        else if (changeEvent.File.Size > BrowserFileHelper.MaxFileSize)
+        {
+            _imageError = $"File size exceeds the maximum limit of {BrowserFileHelper.MaxFileSize / (1024 * 1024)} MB.";
+        }
+        else
+        {
+            try
+            {
+                Contact!.ProfileImageUrl = await BrowserFileHelper.GetImageDataUrlAsync(changeEvent.File);
+                _selectedImage = changeEvent.File;
+            }
+            catch (Exception ex)
+            {
+                _imageError = "An error occurred while processing the image. Please try again.";
+                Console.WriteLine(ex);
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync(Contact);
+    }
+}

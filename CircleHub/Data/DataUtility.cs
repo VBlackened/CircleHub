@@ -80,10 +80,10 @@ public class DataUtility
         {
             var newContacts = new Faker<Contact>()
                 .RuleFor(c => c.LastName, f => f.Name.LastName())
-                .RuleFor(c => c.BirthDate, f => f.Date.Between(
-                    DateTime.Now - TimeSpan.FromDays(365 * 60),
-                    DateTime.Now - TimeSpan.FromDays(365 * 18)
-                    ))
+                .RuleFor(c => c.BirthDate, f => DateOnly.FromDateTime(f.Date.Between(
+                    DateTime.Today.AddYears(-60),
+                    DateTime.Today.AddYears(-18)
+                    )))
                 .RuleFor(c => c.PhoneNumber, f => f.Phone.PhoneNumber())
                 .RuleFor(c => c.Address1, f => f.Address.StreetAddress())
                 .RuleFor(c => c.City, f => f.Address.City())
