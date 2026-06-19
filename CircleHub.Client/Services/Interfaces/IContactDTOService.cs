@@ -14,4 +14,7 @@ public interface IContactDTOService
     //update
     Task UpdateContactAsync(ContactDTO contact, string userId);
 
+    //delete
+    Task DeleteContactAsync(int contactId, string userId);
+
 }

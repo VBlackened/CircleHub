@@ -38,6 +38,10 @@
                     </InputSelect>
                 </div>
             </div>
+            @if (!string.IsNullOrEmpty(_toastMessage))
+            {
+                <ToastMessage @key="_messageId" Message="@_toastMessage" Color="@_messageColor" />
+            }
         </div>
         <div class="col-12 col-lg-8 mb-3">
             <!-- Contact Card List -->
@@ -47,7 +51,7 @@
                     @foreach (ContactDTO contact in _contacts.OrderBy(c => c.LastName).ThenBy(c => c.FirstName))
                     {
                         <div class="col">
-                            <ContactCard Contact="contact" />
+                            <ContactCard Contact="contact" OnContactDelete="DeleteContact" />
                         </div>
                     }
                 }
@@ -75,6 +79,10 @@
 
     [SupplyParameterFromQuery]
     private string? _searchInput { get; set; }
+
+    private string? _toastMessage;
+    private string? _messageColor;
+    private Guid _messageId = Guid.NewGuid(); //used to force the ToastMessage component to re-render when the same message is shown multiple times in a row
 
     private UserInfo? _userInfo;
     private IEnumerable<ContactDTO> _contacts = [];
@@ -109,5 +117,37 @@
         {
             Console.WriteLine(ex);
         }
+    }
+
+    private async Task DeleteContact(int Id)
+    {
+        //call service to delete contact
+        try
+        {
+            await ContactService.DeleteContactAsync(Id, _userInfo!.UserId);
+            _contacts = _contacts.Where(c => c.Id != Id);
+
+            ShowToastMessage("Contact succesfully deleted.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            ShowToastMessage("Something went wrong while deleting the contact.");
+        }
+    }
+
+    private void ShowToastMessage(string message)
+    {
+        _toastMessage = message;
+
+        if(message.Contains("wrong"))
+        {
+            _messageColor = "danger";
+        }
+        else
+        {
+            _messageColor = "success";
+        }
+        _messageId = Guid.NewGuid();
     }
 }

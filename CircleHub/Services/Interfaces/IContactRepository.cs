@@ -16,4 +16,7 @@ public interface IContactRepository
 
     Task AddCategoriesToContact(int contactId, string userId, List<int> categoryIds);
     Task RemoveCategoriesFromContact(int contactId, string userId);
+
+    //Delete
+    Task DeleteContactAsync(int contactId, string userId);
 }

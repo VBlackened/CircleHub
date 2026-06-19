@@ -112,4 +112,18 @@ public class ContactRepository(IDbContextFactory<ApplicationDbContext> dbContext
             await context.SaveChangesAsync();
         }
     }
+
+    public async Task DeleteContactAsync(int contactId, string userId)
+    {
+        using ApplicationDbContext context = dbContextFactory.CreateDbContext();
+
+        Contact? contact = await context.Contacts
+            .FirstOrDefaultAsync(c => c.Id == contactId && c.AppUserId == userId);
+
+        if (contact is not null)
+        {
+            context.Contacts.Remove(contact);
+            await context.SaveChangesAsync();
+        }
+    }
 }

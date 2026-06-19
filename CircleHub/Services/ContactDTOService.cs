@@ -94,4 +94,9 @@ public class ContactDTOService(IContactRepository repository) : IContactDTOServi
         List<int> categoryIds = dto.Categories.Select(c => c.Id).ToList();
         await repository.AddCategoriesToContact(contact.Id, userId, categoryIds);
     }
+
+    public async Task DeleteContactAsync(int contactId, string userId)
+    {
+        await repository.DeleteContactAsync(contactId, userId);
+    }
 }
