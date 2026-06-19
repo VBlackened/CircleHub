@@ -52,9 +52,11 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 //Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IContactRepository, ContactRepository>();
 
 //DTO Services
 builder.Services.AddScoped<ICategoryDTOService, CategoryDTOService>();
+builder.Services.AddScoped<IContactDTOService, ContactDTOService>();
 
 var app = builder.Build();
 

@@ -2,6 +2,9 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 
+@inject IContactDTOService ContactService
+@inject NavigationManager Nav
+
 <PageTitle>CircleHub | Create Contact</PageTitle>
 
 <div class="container">
@@ -17,5 +20,11 @@
     private async Task HandleSubmit(ContactDTO contact)
     {
         UserInfo? userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+        if (userInfo is not null)
+        {
+            await ContactService.CreateContactAsync(contact, userInfo.UserId);
+            Nav.NavigateTo("/contacts");
+        }
     }
 }

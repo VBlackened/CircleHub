@@ -1,0 +1,42 @@
+.square-img-container {
+    position: relative;
+    background-color: #edf5fc;
+}
+
+    .square-img-container::after {
+        content: "";
+        display: block;
+        padding-bottom: 100%;
+    }
+
+.square-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+}
+
+.editIcons {
+    font-size: 1.5rem;
+    opacity: .9;
+    color: #002a4e;
+    transition: color 0.25s;
+}
+
+    .editIcons:hover {
+        color: #0869b8;
+        font-weight: bold;
+        opacity: 1;
+        cursor: pointer;
+    }
+
+a.badge {
+    transition: background-color 0.25s;
+
+}
+
+a.badge:hover {
+        background-color: var(--cf-theme-100);
+    }
+

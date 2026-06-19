@@ -2,6 +2,10 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 
+@inject ICategoryDTOService CategoryService
+@inject IContactDTOService ContactService
+@inject NavigationManager NavigationManager
+
 <PageTitle>CircleHub | Contacts</PageTitle>
 
 <div class="container">
@@ -13,10 +17,97 @@
             <a href="/contacts/create" class="btn btn-primary rounded-pill">New Contact</a>
         </div>
     </div>
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            <!-- Search Column -->
+            <div class="mb-3 sideNav">
+                <form>
+                    <div class="input-group">
+                        <InputText class="form-group " type="search" placeholder="Search Contacts" @bind-Value="_searchInput" />
+                        <input type="submit" class="btn btn-primary" value="search" />
+                    </div>
+                </form>
+                <div class="mt-5">
+                    <label class="form-label">Category Filter</label>
+                    <InputSelect class="form-select" @bind-Value="_categoryId">
+                        <option value="">All</option>
+                        @foreach (CategoryDTO category in _categories)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-8 mb-3">
+            <!-- Contact Card List -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-1">
+                @if (_contacts.Count() > 0)
+                {
+                    @foreach (ContactDTO contact in _contacts.OrderBy(c => c.LastName).ThenBy(c => c.FirstName))
+                    {
+                        <div class="col">
+                            <ContactCard Contact="contact" />
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center sideNav">
+                        <h4>No Contacts Found!</h4>
+                        <p>
+                            Why don't you <a href="contacts/create">create some</a>?
+                        </p>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
 </div>
 
-<h3>Contacts</h3>
-
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? _authStateTask { get; set; }
 
+    [SupplyParameterFromQuery]
+    private int? _categoryId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? _searchInput { get; set; }
+
+    private UserInfo? _userInfo;
+    private IEnumerable<ContactDTO> _contacts = [];
+    private IEnumerable<CategoryDTO> _categories = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userInfo = await UserInfoHelper.GetUserInfoAsync(_authStateTask);
+
+        try
+        {
+            _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _userInfo ??= await UserInfoHelper.GetUserInfoAsync(_authStateTask);
+
+        _categoryId = null;
+
+        //Get a list of contacts
+        try
+        {
+            _contacts = await ContactService.GetContactsAsync(_userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
 }

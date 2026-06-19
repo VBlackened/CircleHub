@@ -147,6 +147,9 @@
 
     private async Task HandleSubmit()
     {
+        List<CategoryDTO> selectedCategories = _categories.Where(c => _selectedCategoryIds.Contains(c.Id)).ToList();
+        Contact!.Categories = selectedCategories;
+
         await OnSubmit.InvokeAsync(Contact);
     }
 }

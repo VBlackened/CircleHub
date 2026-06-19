@@ -1,0 +1,53 @@
+﻿@page "/contacts/edit/{contactId:int}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IContactDTOService ContactService
+@inject NavigationManager Nav
+
+<PageTitle>CircleHub | @(contact?.FullNameTag ?? "Loading...")</PageTitle>
+
+@if (contact is not null)
+{
+    <div class="container">
+        <div class="p-3 my-5 border border-2 shadow-lg bg-light">
+            <ContactForm Contact="contact" OnSubmit="HandleSubmit" />
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public int ContactId { get; set; }
+
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    public UserInfo? userInfo;
+    public ContactDTO? contact;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+        contact = await ContactService.GetContactByIdAsync(ContactId, userInfo!.UserId);
+
+        if (contact is null)
+        {
+            Nav.NavigateTo("/contacts");
+        }
+
+    }
+
+    private async Task HandleSubmit(ContactDTO contact)
+    {
+        if (userInfo is not null)
+        {
+            //call service to update contact
+            await ContactService.UpdateContactAsync(contact, userInfo.UserId);
+
+            //navigate back to index page
+            Nav.NavigateTo("/contacts");
+        }
+    }
+}
