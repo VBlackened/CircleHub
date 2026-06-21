@@ -10,6 +10,7 @@ public interface IContactDTOService
     //Read
     Task<List<ContactDTO>> GetContactsAsync(string userId);
     Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId);
+    Task<List<ContactDTO>> SearchContactsAsync(string searchTerm, string userId);
 
     //update
     Task UpdateContactAsync(ContactDTO contact, string userId);

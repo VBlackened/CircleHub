@@ -4,7 +4,7 @@
 
 @inject ICategoryDTOService CategoryService
 @inject IContactDTOService ContactService
-@inject NavigationManager NavigationManager
+@inject NavigationManager Nav
 
 <PageTitle>CircleHub | Contacts</PageTitle>
 
@@ -21,7 +21,7 @@
         <div class="col-12 col-lg-4">
             <!-- Search Column -->
             <div class="mb-3 sideNav">
-                <form>
+                <form @onsubmit="SearchContacts">
                     <div class="input-group">
                         <InputText class="form-group " type="search" placeholder="Search Contacts" @bind-Value="_searchInput" />
                         <input type="submit" class="btn btn-primary" value="search" />
@@ -29,7 +29,7 @@
                 </form>
                 <div class="mt-5">
                     <label class="form-label">Category Filter</label>
-                    <InputSelect class="form-select" @bind-Value="_categoryId">
+                    <InputSelect class="form-select" @bind-Value="CategoryId">
                         <option value="">All</option>
                         @foreach (CategoryDTO category in _categories)
                         {
@@ -72,25 +72,28 @@
 
 @code {
     [CascadingParameter]
-    private Task<AuthenticationState>? _authStateTask { get; set; }
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     [SupplyParameterFromQuery]
-    private int? _categoryId { get; set; }
+    private int? CategoryId { get; set; }
 
     [SupplyParameterFromQuery]
-    private string? _searchInput { get; set; }
+    private string? SearchTerm { get; set; }
+
+    private UserInfo? _userInfo;
+
+    private IEnumerable<ContactDTO> _contacts = [];
+    private IEnumerable<CategoryDTO> _categories = [];
+
+    private string? _searchInput;
 
     private string? _toastMessage;
     private string? _messageColor;
     private Guid _messageId = Guid.NewGuid(); //used to force the ToastMessage component to re-render when the same message is shown multiple times in a row
 
-    private UserInfo? _userInfo;
-    private IEnumerable<ContactDTO> _contacts = [];
-    private IEnumerable<CategoryDTO> _categories = [];
-
     protected override async Task OnInitializedAsync()
     {
-        _userInfo = await UserInfoHelper.GetUserInfoAsync(_authStateTask);
+        _userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
 
         try
         {
@@ -104,19 +107,39 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        _userInfo ??= await UserInfoHelper.GetUserInfoAsync(_authStateTask);
+        _userInfo ??= await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+        _searchInput = SearchTerm;
 
-        _categoryId = null;
+        CategoryId = null;
 
-        //Get a list of contacts
         try
         {
-            _contacts = await ContactService.GetContactsAsync(_userInfo!.UserId);
+            if(!string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                _contacts = await ContactService.SearchContactsAsync(SearchTerm, _userInfo!.UserId);
+            }
+            else
+            {
+                //Get a list of contacts
+                _contacts = await ContactService.GetContactsAsync(_userInfo!.UserId);
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
+            ShowToastMessage("Something went wrong while loading the contacts.");
         }
+    }
+
+    private void SearchContacts()
+    {
+        Dictionary<string, object?> queryParams = new Dictionary<string, object?>
+        {
+            {nameof(SearchTerm), _searchInput}
+        };
+
+        string url = Nav.GetUriWithQueryParameters(queryParams);
+        Nav.NavigateTo(url);
     }
 
     private async Task DeleteContact(int Id)
@@ -140,7 +163,7 @@
     {
         _toastMessage = message;
 
-        if(message.Contains("wrong"))
+        if (message.Contains("wrong"))
         {
             _messageColor = "danger";
         }

@@ -64,6 +64,27 @@ public class ContactRepository(IDbContextFactory<ApplicationDbContext> dbContext
 
         return contacts;
     }
+    public async Task<List<Contact>> SearchContactsAsync(string searchTerm, string userId)
+    {
+        using ApplicationDbContext context = dbContextFactory.CreateDbContext();
+
+        string searchTermLower = searchTerm.Trim().ToLower();
+
+        List<Contact> contacts = await context.Contacts
+            .Where(c => c.AppUserId == userId)
+            .Include(c => c.Categories)
+            .Where(c => string.IsNullOrEmpty(searchTermLower) 
+            || c.FirstName!.ToLower().Contains(searchTermLower)
+            || c.LastName!.ToLower().Contains(searchTermLower)
+            || c.Address1!.ToLower().Contains(searchTermLower)
+            || c.Address2!.ToLower().Contains(searchTermLower)
+            || c.Email!.ToLower().Contains(searchTermLower)
+            || c.PhoneNumber!.ToLower().Contains(searchTermLower)
+            || c.Categories.Any(cat => cat.Name!.ToLower().Contains(searchTermLower)))
+            .ToListAsync();
+
+        return contacts;
+    }
 
     public async Task UpdateContactAsync(Contact contact)
     {

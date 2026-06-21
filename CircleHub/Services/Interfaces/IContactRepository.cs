@@ -10,6 +10,7 @@ public interface IContactRepository
     //Read
     Task<Contact?> GetContactByIdAsync(int contactId, string userId);
     Task<List<Contact>> GetContactsAsync(string userId);
+    Task<List<Contact>> SearchContactsAsync(string searchTerm, string userId);
 
     //Update
     Task UpdateContactAsync(Contact contact);
@@ -19,4 +20,6 @@ public interface IContactRepository
 
     //Delete
     Task DeleteContactAsync(int contactId, string userId);
+
+
 }

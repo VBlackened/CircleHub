@@ -92,11 +92,13 @@
     public EventCallback<ContactDTO> OnSubmit { get; set; }
 
     [CascadingParameter]
-    private Task<AuthenticationState>? _authStateTask { get; set; }
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private UserInfo? _userInfo;
+
     private IEnumerable<CategoryDTO> _categories = [];
     private int[] _selectedCategoryIds = [];
+
     private string? _imageError;
     private IBrowserFile? _selectedImage;
 
@@ -108,7 +110,7 @@
 
         try
         {
-            _userInfo = await UserInfoHelper.GetUserInfoAsync(_authStateTask);
+            _userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
             _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
         }
         catch (Exception ex)
