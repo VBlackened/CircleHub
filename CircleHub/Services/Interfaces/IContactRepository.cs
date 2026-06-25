@@ -11,6 +11,7 @@ public interface IContactRepository
     Task<Contact?> GetContactByIdAsync(int contactId, string userId);
     Task<List<Contact>> GetContactsAsync(string userId);
     Task<List<Contact>> SearchContactsAsync(string searchTerm, string userId);
+    Task<List<Contact>> GetContactsByCategoryAsync(int categoryId, string userId);
 
     //Update
     Task UpdateContactAsync(Contact contact);

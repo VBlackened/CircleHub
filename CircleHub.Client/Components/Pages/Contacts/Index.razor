@@ -29,7 +29,7 @@
                 </form>
                 <div class="mt-5">
                     <label class="form-label">Category Filter</label>
-                    <InputSelect class="form-select" @bind-Value="CategoryId">
+                    <InputSelect class="form-select" @bind-Value="CategoryId" @bind-Value:after="OnCategorySelected">
                         <option value="">All</option>
                         @foreach (CategoryDTO category in _categories)
                         {
@@ -110,13 +110,17 @@
         _userInfo ??= await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
         _searchInput = SearchTerm;
 
-        CategoryId = null;
-
         try
         {
             if(!string.IsNullOrWhiteSpace(SearchTerm))
             {
+                CategoryId = null;
                 _contacts = await ContactService.SearchContactsAsync(SearchTerm, _userInfo!.UserId);
+            } 
+            else if (CategoryId.HasValue) 
+            {
+                SearchTerm = null;
+                _contacts = await ContactService.GetContactsByCategoryAsync(CategoryId.Value, _userInfo!.UserId);
             }
             else
             {
@@ -135,9 +139,21 @@
     {
         Dictionary<string, object?> queryParams = new Dictionary<string, object?>
         {
-            {nameof(SearchTerm), _searchInput}
+            {nameof(SearchTerm), _searchInput},
+            {nameof(CategoryId), null}
         };
 
+        string url = Nav.GetUriWithQueryParameters(queryParams);
+        Nav.NavigateTo(url);
+    }
+
+    private void OnCategorySelected()
+    {
+        Dictionary<string, object?> queryParams = new Dictionary<string, object?>
+        {
+            {nameof(SearchTerm), null},
+            {nameof(CategoryId), CategoryId}
+        };
         string url = Nav.GetUriWithQueryParameters(queryParams);
         Nav.NavigateTo(url);
     }

@@ -52,7 +52,6 @@ public class ContactRepository(IDbContextFactory<ApplicationDbContext> dbContext
 
         return contact;
     }
-
     public async Task<List<Contact>> GetContactsAsync(string userId)
     {
         using ApplicationDbContext context = dbContextFactory.CreateDbContext();
@@ -63,6 +62,16 @@ public class ContactRepository(IDbContextFactory<ApplicationDbContext> dbContext
             .ToListAsync();
 
         return contacts;
+    }
+    public async Task<List<Contact>> GetContactsByCategoryAsync(int categoryId, string userId)
+    {
+        using ApplicationDbContext context = dbContextFactory.CreateDbContext();
+        Category? category = await context.Categories
+            .Include(c => c.Contacts)
+            .ThenInclude(c => c.Categories)
+            .FirstOrDefaultAsync(c => c.Id == categoryId && c.AppUserId == userId);
+
+        return category?.Contacts.ToList() ?? [];
     }
     public async Task<List<Contact>> SearchContactsAsync(string searchTerm, string userId)
     {
@@ -85,6 +94,7 @@ public class ContactRepository(IDbContextFactory<ApplicationDbContext> dbContext
 
         return contacts;
     }
+
 
     public async Task UpdateContactAsync(Contact contact)
     {

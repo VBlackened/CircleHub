@@ -56,6 +56,14 @@ public class ContactDTOService(IContactRepository repository) : IContactDTOServi
         Contact? contact = await repository.GetContactByIdAsync(contactId, userId);
         return contact?.ToDTO();
     }
+    public async Task<List<ContactDTO>> GetContactsByCategoryAsync(int categoryId, string userId)
+    {
+        List<Contact> contacts = await repository.GetContactsByCategoryAsync(categoryId, userId);
+
+        List<ContactDTO> contactDTOs = contacts.Select(c => c.ToDTO()).ToList();
+
+        return contactDTOs;
+    }
     public async Task<List<ContactDTO>> SearchContactsAsync(string searchTerm, string userId)
     {
         List<Contact> contacts = await repository.SearchContactsAsync(searchTerm, userId);

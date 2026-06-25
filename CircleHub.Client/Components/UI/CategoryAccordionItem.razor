@@ -21,7 +21,7 @@
                             <a role="button" class="me-1">
                                 <i class="bi bi-trash-fill text-danger" @onclick="() => _status = Status.Deleting" aria-label="Delete Category"></i>
                             </a>
-                            <a role="button" class="me-1">
+                            <a role="button" href="/contacts?CategoryId=@Category.Id" class="me-1">
                                 <i class="bi bi-eye-fill" aria-label="View Category"></i>
                             </a>
                             <a role="button" class="me-1">
@@ -91,9 +91,24 @@
         <div id="collapse-@Category.Id" class="accordion-collapse collapse" data-bs-parent="#@parentId">
             <div class="accordion-body">
                 <ul class="list-group">
-                    <li class="list-group-item text-center lead text-secondary">
-                        No Contacts in this Category
-                    </li>
+                    @if (Category.Contacts.Count > 0)
+                    {
+                        @foreach (ContactDTO contact in Category.Contacts)
+                        {
+                            <li class="list-group-item d-flex gap-3 align-items-start">
+                                <a href="/contacts/edit/@contact.Id" class="text-decoration-none text-dark ">
+                                    <img class="contact-preview-img" src="@contact.ProfileImageUrl" alt="image for @contact.FullNameTag" />
+                                    <span>@contact.FullNameTag</span>
+                                </a>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-center lead text-secondary">
+                            No Contacts in this Category
+                        </li>
+                    }
                 </ul>
             </div>
         </div>
