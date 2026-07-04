@@ -1,0 +1,70 @@
+﻿@page "/contacts/email/{contactId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@inject NavigationManager Nav
+@inject IContactDTOService ContactService
+
+<PageTitle>Circle Hub | Email Contact</PageTitle>
+
+@if (_emailData is not null)
+{
+    <div class="container">
+        <div class="card shadow-lg my-3">
+            <div class="card-body">
+                <EmailForm EmailData="_emailData" ReturnUrl="/contacts" ReturnText="Back to Contacts" OnSubmit="SendEmail" />
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int ContactId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private ContactDTO? _contact;
+    private UserInfo? _userInfo;
+    private EmailData? _emailData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+            _contact = await ContactService.GetContactByIdAsync(ContactId, _userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        if (_contact is not null)
+        {
+            _emailData = new EmailData()
+            {
+                Recipients = _contact.Email!,
+                Subject = $"Message for {_contact.FullNameTag}",
+                Body = string.Empty
+            };
+        }
+        else
+        {
+            Nav.NavigateTo("/contacts");
+        }
+    }
+
+    private async Task SendEmail(EmailData formEmailData)
+    {
+        string message = "Something went wrong while sending the email. Please try again later.";
+
+        //Call the service to send the email
+        Console.WriteLine($"Sending email to: {formEmailData.Recipients}");
+
+        //Navigate back to the contacts page after sending the email
+        Nav.NavigateTo($"/contacts?message={message}");
+    }
+}

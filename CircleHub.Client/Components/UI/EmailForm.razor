@@ -1,0 +1,53 @@
+﻿@if (EmailData is not null)
+{
+    <div class="p-2">
+        <EditForm Model="EmailData" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <div class="row row-cols-1 g-3">
+                <div class="col">
+                    <label class="form-label">To:</label>
+                    <InputTextArea type="email" readonly class="form-control" rows="3" @bind-Value="EmailData.Recipients"></InputTextArea>
+                    <ValidationMessage For="@(() => EmailData.Recipients)" />
+                </div>
+                <div class="col">
+                    <label class="form-label">Subject:</label>
+                    <InputText type="text" class="form-control" @bind-Value="EmailData.Subject"></InputText>
+                    <ValidationMessage For="@(() => EmailData.Subject)" />
+                </div>
+                <div class="col">
+                    <label class="form-label">Body:</label>
+                    <InputTextArea type="text" class="form-control" rows="10" @bind-Value="EmailData.Body"></InputTextArea>
+                    <ValidationMessage For="@(() => EmailData.Body)" />
+                </div>
+                <div class="col text-end">
+                    <button class="btn btn-lg btn-primary rounded-pill" type="submit">Send</button>
+                </div>
+                <div class="col text-start">
+                    <a href="@ReturnUrl" class="btn"><i class="bi bi-arrow-left"></i> @ReturnText</a>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+}
+
+@code {
+
+    [Parameter, EditorRequired]
+    public EmailData? EmailData { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<EmailData> OnSubmit { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public string ReturnUrl { get; set; } = default!;
+
+    [EditorRequired]
+    [Parameter]
+    public string ReturnText { get; set; } = default!;
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync(EmailData);
+    }
+}

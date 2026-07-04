@@ -1,0 +1,71 @@
+﻿@page "/categories/email/{categoryId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@inject NavigationManager Nav
+@inject ICategoryDTOService CategoryService
+
+<PageTitle>Circle Hub | Email Category</PageTitle>
+
+@if (_emailData is not null)
+{
+    <div class="container">
+        <div class="card shadow-lg my-3">
+            <div class="card-body">
+                <EmailForm EmailData="_emailData" ReturnUrl="/categories" ReturnText="Back to Categories" OnSubmit="SendEmail" />
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public int CategoryId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private CategoryDTO? _category;
+    private UserInfo? _userInfo;
+    private EmailData? _emailData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+            _category = await CategoryService.GetCategoryAsync(CategoryId, _userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        if (_category is not null)
+        {
+            _emailData = new EmailData()
+            {
+                Recipients = string.Join(";", _category.Contacts.Select(c => c.Email)),
+                Subject = $"Group message for {_category.Name}",
+                Body = string.Empty
+            };
+        }
+        else
+        {
+            Nav.NavigateTo("/categories");
+        }
+    }
+
+    private async Task SendEmail(EmailData formEmailData)
+    {
+        string message = "Something went wrong while sending the email. Please try again later.";
+
+        //Call the service to send the email
+        Console.WriteLine($"Sending email to: {formEmailData.Recipients}");
+
+        //Navigate back to the categories page after sending the email
+        Nav.NavigateTo($"/categories?message={message}");
+    }
+}

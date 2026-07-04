@@ -3,7 +3,7 @@
 
 @if (!string.IsNullOrEmpty(Message))
 {
-    <div class="toast text-@Color-emphasis bg-@Color-subtle border-@Color @(jsFailed ? "show" : "")"
+    <div class="toast mb-3 text-@Color-emphasis bg-@Color-subtle border-@Color @(jsFailed ? "show" : "")"
          role="alert" aria-live="assertive" aria-atomic="true" @ref="toast">
         <div class="d-flex">
             <div class="toast-body flex-grow-1">
@@ -44,9 +44,8 @@
                 //call the export function to initialized and show the toast
                 await toastJS.InvokeVoidAsync("initToast", toast);
             }
-            catch (Exception ex)
+            catch (JSException)
             {
-                Console.WriteLine(ex);
                 jsFailed = true;
             }
         }
@@ -55,9 +54,18 @@
     //if you import a js file, you should dispose it
     public async ValueTask DisposeAsync()
     {
-        if (toastJS is not null)
+        if (toastJS is null)
+        {
+            return;
+        }
+
+        try
         {
             await toastJS.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // User refreshed or left the page.
         }
     }
 }

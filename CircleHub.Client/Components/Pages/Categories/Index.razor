@@ -2,6 +2,8 @@
 @attribute [Authorize]
 @rendermode InteractiveAuto
 
+@inject NavigationManager Nav
+
 @inject ICategoryDTOService CategoryService
 
 <PageTitle>CircleHub | Categories</PageTitle>
@@ -22,6 +24,10 @@
             </li>
         </ul>
     </EditForm>
+    @if (!string.IsNullOrEmpty(_toastMessage))
+    {
+        <ToastMessage @key="_messageId" Message="@_toastMessage" Color="@_messageColor" />
+    }
     <CategoryAccordion Categories="_categories" OnCategoryChange="UpdateCategory" OnCategoryDelete="DeleteCategory" />
 </div>
 
@@ -29,16 +35,34 @@
     [CascadingParameter]
     private Task<AuthenticationState>? _authStateTask { get; set; }
 
+    [SupplyParameterFromQuery]
+    private string? Message { get; set; }
+
     private UserInfo? _userInfo;
 
     private CategoryDTO _newCategory = new CategoryDTO();
 
     private IEnumerable<CategoryDTO> _categories = [];
 
+    private string? _toastMessage;
+    private string? _messageColor;
+    private Guid _messageId = Guid.NewGuid(); //used to force the ToastMessage component to re-render when the same message is shown multiple times in a row
+
     protected override async Task OnInitializedAsync()
     {
         _userInfo = await UserInfoHelper.GetUserInfoAsync(_authStateTask);
         _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Message)) 
+        {
+            ShowToastMessage(Message);
+
+            var uri = Nav.GetUriWithQueryParameter("message", (string?)null);
+            Nav.NavigateTo(uri, replace: true);
+        }
     }
 
     private async Task HandleNewCategory()
@@ -47,16 +71,34 @@
         _newCategory = new CategoryDTO();
 
         _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
+        ShowToastMessage("Category created successfully!");
     }
 
     private async Task UpdateCategory(CategoryDTO category)
     {
         await CategoryService.UpdateCategoryAsync(category, _userInfo!.UserId);
+        ShowToastMessage("Category updated successfully!");
     }
 
     private async Task DeleteCategory(int categoryId)
     {
         await CategoryService.DeleteCategoryAsync(categoryId, _userInfo!.UserId);
         _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
+        ShowToastMessage("Category deleted successfully!");
+    }
+
+    private void ShowToastMessage(string message)
+    {
+        _toastMessage = message;
+
+        if (message.Contains("wrong"))
+        {
+            _messageColor = "danger";
+        }
+        else
+        {
+            _messageColor = "success";
+        }
+        _messageId = Guid.NewGuid();
     }
 }

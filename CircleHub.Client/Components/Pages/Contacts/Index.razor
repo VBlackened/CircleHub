@@ -23,7 +23,7 @@
             <div class="mb-3 sideNav">
                 <form @onsubmit="SearchContacts">
                     <div class="input-group">
-                        <InputText class="form-group " type="search" placeholder="Search Contacts" @bind-Value="_searchInput" />
+                        <InputText class="form-control" type="search" placeholder="Search Contacts" @bind-Value="_searchInput" />
                         <input type="submit" class="btn btn-primary" value="search" />
                     </div>
                 </form>
@@ -71,14 +71,17 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthStateTask { get; set; }
+        [CascadingParameter]
+        private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-    [SupplyParameterFromQuery]
-    private int? CategoryId { get; set; }
+        [SupplyParameterFromQuery]
+        private int? CategoryId { get; set; }
 
-    [SupplyParameterFromQuery]
-    private string? SearchTerm { get; set; }
+        [SupplyParameterFromQuery]
+        private string? SearchTerm { get; set; }
+
+        [SupplyParameterFromQuery]
+        private string? Message { get; set; }
 
     private UserInfo? _userInfo;
 
@@ -109,6 +112,14 @@
     {
         _userInfo ??= await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
         _searchInput = SearchTerm;
+
+        if (!string.IsNullOrEmpty(Message)) 
+        {
+            ShowToastMessage(Message);
+
+            var uri = Nav.GetUriWithQueryParameter("message", (string?)null);
+            Nav.NavigateTo(uri, replace: true);
+        }
 
         try
         {
