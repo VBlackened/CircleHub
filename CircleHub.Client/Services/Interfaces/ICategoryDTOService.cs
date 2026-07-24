@@ -16,4 +16,7 @@ public interface ICategoryDTOService
 
     //Delete
     Task DeleteCategoryAsync(int id, string userId);
+
+    //Email
+    Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId);
 }

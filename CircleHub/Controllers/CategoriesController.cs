@@ -14,49 +14,49 @@ namespace CircleHub.Controllers;
 [Authorize]
 public class CategoriesController(ICategoryDTOService categoryService, UserManager<ApplicationUser> userManager) : ControllerBase
 {
-    private string _userId => userManager.GetUserId(User)!; //[Authorize] means userId will never be null
+    private string UserId => userManager.GetUserId(User)!; //[Authorize] means userId will never be null
 
     [HttpGet]
     public async Task<ActionResult<List<CategoryDTO>>> GetCategories()
     {
         try
         {
-            return await categoryService.GetCategoriesAsync(_userId);
+            return await categoryService.GetCategoriesAsync(UserId);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-            return Problem();
+            Console.WriteLine($"Error in GetCategories: {ex.Message}");
+            return Problem(detail: ex.Message);
         }
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
+    public async Task<ActionResult<CategoryDTO>> GetCategoryById([FromRoute] int id)
     {
         try
         {
-            CategoryDTO? category = await categoryService.GetCategoryAsync(id, _userId);
+            CategoryDTO? category = await categoryService.GetCategoryAsync(id, UserId);
             return category is null ? NotFound() : category;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-            return Problem();
+            Console.WriteLine($"Error in GetCategory: {ex.Message}");
+            return Problem(detail: ex.Message);
         }
     }
 
     [HttpPost]
-    public async Task<ActionResult<CategoryDTO>> CreateCategory(CategoryDTO category)
+    public async Task<ActionResult<CategoryDTO>> CreateCategory([FromBody] CategoryDTO category)
     {
         try
         {
-            CategoryDTO createdCategory = await categoryService.CreateCategoryAsync(category, _userId);
-            return CreatedAtAction(nameof(GetCategory), new { id = createdCategory.Id }, createdCategory);
+            CategoryDTO createdCategory = await categoryService.CreateCategoryAsync(category, UserId);
+            return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-            return Problem();
+            Console.WriteLine($"Error in CreateCategory: {ex.Message}");
+            return Problem(detail: ex.Message);
         }
     }
 
@@ -70,13 +70,13 @@ public class CategoriesController(ICategoryDTOService categoryService, UserManag
 
         try
         {
-            await categoryService.UpdateCategoryAsync(category, _userId);
+            await categoryService.UpdateCategoryAsync(category, UserId);
             return NoContent();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-            return Problem();
+            Console.WriteLine($"Error in UpdateCategory: {ex.Message}");
+            return Problem(detail: ex.Message);
         }
     }
 
@@ -85,13 +85,28 @@ public class CategoriesController(ICategoryDTOService categoryService, UserManag
     {
         try
         {
-            await categoryService.DeleteCategoryAsync(id, _userId);
+            await categoryService.DeleteCategoryAsync(id, UserId);
             return NoContent();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-            return Problem();
+            Console.WriteLine($"Error in DeleteCategory: {ex.Message}");
+            return Problem(detail: ex.Message);
+        }
+    }
+
+    [HttpPost("{categoryId:int}/email")]
+    public async Task<ActionResult> EmailCategory([FromRoute] int categoryId, [FromBody] EmailData emailData)
+    {
+        try
+        {
+            bool success = await categoryService.EmailCategoryAsync(categoryId, emailData, UserId);
+            return success ? Ok() : BadRequest("Failed to send email.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in EmailCategory: {ex.Message}");
+            return Problem(detail: ex.Message);
         }
     }
 

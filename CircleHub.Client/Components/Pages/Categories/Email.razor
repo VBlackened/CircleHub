@@ -1,5 +1,5 @@
 ﻿@page "/categories/email/{categoryId:int}"
-@rendermode InteractiveServer
+@rendermode InteractiveWebAssembly
 @attribute [Authorize]
 
 @inject NavigationManager Nav
@@ -47,9 +47,10 @@
         {
             _emailData = new EmailData()
             {
-                Recipients = string.Join(";", _category.Contacts.Select(c => c.Email)),
+                Recipients = _category.Contacts.Select(c => c.Email!).ToList(),
                 Subject = $"Group message for {_category.Name}",
-                Body = string.Empty
+                Body = string.Empty,
+                ReplyToEmail = _userInfo!.Email,
             };
         }
         else
@@ -62,10 +63,23 @@
     {
         string message = "Something went wrong while sending the email. Please try again later.";
 
-        //Call the service to send the email
-        Console.WriteLine($"Sending email to: {formEmailData.Recipients}");
+        try
+        {
+            bool success = await CategoryService.EmailCategoryAsync(
+                CategoryId,
+                formEmailData,
+                _userInfo!.UserId);
 
-        //Navigate back to the categories page after sending the email
+            if (success)
+            {
+                message = "Email sent successfully!";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
         Nav.NavigateTo($"/categories?message={message}");
     }
 }

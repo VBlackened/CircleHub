@@ -13,6 +13,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistentAuthentication
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+builder.Services.AddScoped<IContactDTOService, WASMContactDTOService>();
 builder.Services.AddScoped<ICategoryDTOService, WASMCategoryDTOService>();
 
 await builder.Build().RunAsync();

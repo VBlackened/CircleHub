@@ -1,11 +1,13 @@
 ﻿using CircleHub.Client.Models;
 using CircleHub.Client.Services.Interfaces;
 using CircleHub.Models;
+using CircleHub.Services.Email;
 using CircleHub.Services.Interfaces;
+using Resend;
 
 namespace CircleHub.Services;
 
-public class CategoryDTOService(ICategoryRepository repository) : ICategoryDTOService
+public class CategoryDTOService(ICategoryRepository repository, IEmailService emailService) : ICategoryDTOService
 {
     public async Task<CategoryDTO> CreateCategoryAsync(CategoryDTO category, string userId)
     {
@@ -50,5 +52,35 @@ public class CategoryDTOService(ICategoryRepository repository) : ICategoryDTOSe
     public async Task DeleteCategoryAsync(int id, string userId)
     {
         await repository.DeleteCategoryAsync(id, userId);
+    }
+
+    public async Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId)
+    {
+        Category? category = await repository.GetCategoryAsync(categoryId, userId);
+        if (category is null || !emailData.Recipients.Any())
+        {
+            return false;
+        }
+
+        try
+        {
+            var request = new EmailRequest
+            {
+                Recipients = emailData.Recipients,
+                Subject = emailData.Subject,
+                HtmlBody = $"""
+                <p>{emailData.Body.Replace("\n", "<br>")}</p>
+                """,
+                ReplyToEmail = emailData.ReplyToEmail
+            };
+
+            await emailService.SendEmailAsync(request);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+
     }
 }

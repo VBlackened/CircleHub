@@ -1,5 +1,5 @@
 ﻿@page "/contacts/email/{contactId:int}"
-@rendermode InteractiveServer
+@rendermode InteractiveWebAssembly
 @attribute [Authorize]
 
 @inject NavigationManager Nav
@@ -46,9 +46,10 @@
         {
             _emailData = new EmailData()
             {
-                Recipients = _contact.Email!,
+                Recipients = [_contact.Email!],
                 Subject = $"Message for {_contact.FullNameTag}",
-                Body = string.Empty
+                Body = string.Empty,
+                ReplyToEmail = _userInfo!.Email,
             };
         }
         else
@@ -61,10 +62,23 @@
     {
         string message = "Something went wrong while sending the email. Please try again later.";
 
-        //Call the service to send the email
-        Console.WriteLine($"Sending email to: {formEmailData.Recipients}");
+        try
+        {
+            bool success = await ContactService.EmailContactAsync(
+                ContactId,
+                formEmailData,
+                _userInfo!.UserId);
 
-        //Navigate back to the contacts page after sending the email
+            if (success)
+            {
+                message = "Email sent successfully!";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
         Nav.NavigateTo($"/contacts?message={message}");
     }
 }

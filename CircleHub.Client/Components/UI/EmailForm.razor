@@ -6,8 +6,7 @@
             <div class="row row-cols-1 g-3">
                 <div class="col">
                     <label class="form-label">To:</label>
-                    <InputTextArea type="email" readonly class="form-control" rows="3" @bind-Value="EmailData.Recipients"></InputTextArea>
-                    <ValidationMessage For="@(() => EmailData.Recipients)" />
+                    <textarea readonly class="form-control" rows="3">@string.Join("; ", EmailData.Recipients)</textarea>
                 </div>
                 <div class="col">
                     <label class="form-label">Subject:</label>

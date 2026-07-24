@@ -3,14 +3,15 @@ using CircleHub.Client.Services.Interfaces;
 using CircleHub.Helpers;
 using CircleHub.Models;
 using CircleHub.Services.Interfaces;
+using CircleHub.Services.Email;
 
 namespace CircleHub.Services;
 
-public class ContactDTOService(IContactRepository repository) : IContactDTOService
+public class ContactDTOService(IContactRepository repository, IEmailService emailService) : IContactDTOService
 {
     public async Task<ContactDTO> CreateContactAsync(ContactDTO dto, string userId)
     {
-        Contact newContact = new Contact
+        Contact newContact = new()
         {
             AppUserId = userId,
             FirstName = dto.FirstName,
@@ -22,14 +23,14 @@ public class ContactDTOService(IContactRepository repository) : IContactDTOServi
             PostalCode = dto.PostalCode,
             Email = dto.Email,
             PhoneNumber = dto.PhoneNumber,
-            Created = DateTimeOffset.UtcNow, 
+            Created = DateTimeOffset.UtcNow,
         };
 
         //Save image. Convert the URL to the imageUpload type.
         if (dto.ProfileImageUrl?.StartsWith("data:") == true)
         {
             newContact.Image = ImageHelper.GetImageUploadFromUrl(dto.ProfileImageUrl);
-        } 
+        }
 
         newContact = await repository.CreateContactAsync(newContact);
 
@@ -91,28 +92,59 @@ public class ContactDTOService(IContactRepository repository) : IContactDTOServi
             //Created date doesn't change on update
             //AppuserId doesn't change on update
             //ID doesn't change on update
-        }
 
-        if (dto.ProfileImageUrl?.StartsWith("data:") == true)
-        {
-            contact.Image = ImageHelper.GetImageUploadFromUrl(dto.ProfileImageUrl);
-        }
-        else
-        {
-            // If the ProfileImageUrl is null or empty, remove the image
-            contact.Image = null;
-        }
 
-        contact.Categories.Clear();
-        await repository.UpdateContactAsync(contact);
-        await repository.RemoveCategoriesFromContact(contact.Id, userId);
+            if (dto.ProfileImageUrl?.StartsWith("data:") == true)
+            {
+                contact.Image = ImageHelper.GetImageUploadFromUrl(dto.ProfileImageUrl);
+            }
+            else
+            {
+                // If the ProfileImageUrl is null or empty, remove the image
+                contact.Image = null;
+            }
 
-        List<int> categoryIds = dto.Categories.Select(c => c.Id).ToList();
-        await repository.AddCategoriesToContact(contact.Id, userId, categoryIds);
+
+            contact.Categories.Clear();
+            await repository.UpdateContactAsync(contact);
+            await repository.RemoveCategoriesFromContact(contact.Id, userId);
+
+            List<int> categoryIds = dto.Categories.Select(c => c.Id).ToList();
+            await repository.AddCategoriesToContact(contact.Id, userId, categoryIds);
+        }
     }
 
     public async Task DeleteContactAsync(int contactId, string userId)
     {
         await repository.DeleteContactAsync(contactId, userId);
+    }
+
+    public async Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId)
+    {
+        Contact? contact = await repository.GetContactByIdAsync(contactId, userId);
+        if (contact is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            var request = new EmailRequest
+            {
+                Recipients = emailData.Recipients,
+                Subject = emailData.Subject,
+                HtmlBody = $"""
+                <p>{emailData.Body.Replace("\n", "<br>")}</p>
+                """,
+                ReplyToEmail = emailData.ReplyToEmail
+            };
+
+            await emailService.SendEmailAsync(request);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

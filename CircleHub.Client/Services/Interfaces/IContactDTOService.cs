@@ -19,4 +19,7 @@ public interface IContactDTOService
     //delete
     Task DeleteContactAsync(int contactId, string userId);
 
+    //email
+    Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId);
+
 }
