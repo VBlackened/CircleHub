@@ -54,13 +54,13 @@
         }
         else
         {
-            Nav.NavigateTo("/contacts");
+            ToastNavigationHelper.NavigateWithToast(Nav, "/contacts", "Something went wrong while loading the contact.", "danger");
         }
     }
 
     private async Task SendEmail(EmailData formEmailData)
     {
-        string message = "Something went wrong while sending the email. Please try again later.";
+        Dictionary<string, object?> toastQueryParams = new();
 
         try
         {
@@ -71,14 +71,17 @@
 
             if (success)
             {
-                message = "Email sent successfully!";
+                ToastNavigationHelper.NavigateWithToast(Nav, "/contacts", "Email sent successfully!", "success");
+            }
+            else
+            {
+                ToastNavigationHelper.NavigateWithToast(Nav, "/contacts", "Something went wrong while sending the email.", "danger");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
+            ToastNavigationHelper.NavigateWithToast(Nav, "/contacts", "Something went wrong while sending the email.", "danger");
         }
-
-        Nav.NavigateTo($"/contacts?message={message}");
     }
 }

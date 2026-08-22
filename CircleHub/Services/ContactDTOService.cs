@@ -1,13 +1,15 @@
 ﻿using CircleHub.Client.Models;
 using CircleHub.Client.Services.Interfaces;
+using CircleHub.Data;
 using CircleHub.Helpers;
 using CircleHub.Models;
-using CircleHub.Services.Interfaces;
 using CircleHub.Services.Email;
+using CircleHub.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;    
 
 namespace CircleHub.Services;
 
-public class ContactDTOService(IContactRepository repository, IEmailService emailService) : IContactDTOService
+public class ContactDTOService(IContactRepository repository, IEmailService emailService, UserManager<ApplicationUser> _userManager) : IContactDTOService
 {
     public async Task<ContactDTO> CreateContactAsync(ContactDTO dto, string userId)
     {
@@ -129,6 +131,13 @@ public class ContactDTOService(IContactRepository repository, IEmailService emai
 
         try
         {
+            ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+            {
+                return false;
+            }
+
             var request = new EmailRequest
             {
                 Recipients = emailData.Recipients,
@@ -136,7 +145,8 @@ public class ContactDTOService(IContactRepository repository, IEmailService emai
                 HtmlBody = $"""
                 <p>{emailData.Body.Replace("\n", "<br>")}</p>
                 """,
-                ReplyToEmail = emailData.ReplyToEmail
+                ReplyToEmail = emailData.ReplyToEmail,
+                FromName = $"{user.FirstName} {user.LastName} by CircleHub"
             };
 
             await emailService.SendEmailAsync(request);

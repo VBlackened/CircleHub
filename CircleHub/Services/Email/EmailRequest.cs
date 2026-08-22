@@ -9,5 +9,7 @@
         public required string HtmlBody { get; init; }
 
         public string? ReplyToEmail { get; init; }
+
+        public string? FromName { get; init; }
     }
 }

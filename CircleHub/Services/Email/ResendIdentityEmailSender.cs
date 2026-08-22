@@ -12,7 +12,7 @@ public class ResendIdentityEmailSender(IResend _resend, IOptions<ResendOptions> 
     {
         var message = new EmailMessage
         {
-            From = _options.Value.From,
+            From = _options.Value.SystemFrom,
             Subject = "Confirm your CircleHub account",
             HtmlBody = $$"""
             <p>Hello {{user.FirstName}},</p>
@@ -33,7 +33,7 @@ public class ResendIdentityEmailSender(IResend _resend, IOptions<ResendOptions> 
     {
         var message = new EmailMessage
         {
-            From = _options.Value.From,
+            From = _options.Value.SystemFrom,
             Subject = "Reset your CircleHub password",
             HtmlBody = $$"""
             <p>Hello {{user.FirstName}},</p>
@@ -52,7 +52,7 @@ public class ResendIdentityEmailSender(IResend _resend, IOptions<ResendOptions> 
     {
         var message = new EmailMessage
         {
-            From = _options.Value.From,
+            From = _options.Value.SystemFrom,
             Subject = "Reset your CircleHub password",
             HtmlBody = $$"""
             <p>Hello {{user.FirstName}},</p>

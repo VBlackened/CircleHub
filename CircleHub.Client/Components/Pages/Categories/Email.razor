@@ -55,14 +55,12 @@
         }
         else
         {
-            Nav.NavigateTo("/categories");
+            ToastNavigationHelper.NavigateWithToast(Nav, "/categories", "Category not found.", "danger");
         }
     }
 
     private async Task SendEmail(EmailData formEmailData)
     {
-        string message = "Something went wrong while sending the email. Please try again later.";
-
         try
         {
             bool success = await CategoryService.EmailCategoryAsync(
@@ -72,14 +70,17 @@
 
             if (success)
             {
-                message = "Email sent successfully!";
+                ToastNavigationHelper.NavigateWithToast(Nav, "/categories", "Email sent successfully!", "success");
+            }
+            else 
+            {
+                ToastNavigationHelper.NavigateWithToast(Nav, "/categories", "Failed to send email.", "danger");
             }
         }
         catch (Exception ex)
         {
+            ToastNavigationHelper.NavigateWithToast(Nav, "/categories", "Failed to send email.", "danger");
             Console.WriteLine(ex);
         }
-
-        Nav.NavigateTo($"/categories?message={message}");
     }
 }

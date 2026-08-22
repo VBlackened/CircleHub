@@ -6,5 +6,7 @@ public class ResendOptions
 
     public string ApiKey { get; init; } = string.Empty;
 
-    public string From { get; init; } = string.Empty;
+    public string SystemFrom { get; init; } = string.Empty;
+
+    public string ContactFrom { get; init; } = string.Empty;
 }

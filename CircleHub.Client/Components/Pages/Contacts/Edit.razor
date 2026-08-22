@@ -34,20 +34,25 @@
 
         if (contact is null)
         {
-            Nav.NavigateTo("/contacts");
+            ToastNavigationHelper.NavigateWithToast(Nav, "/contacts", "Something went wrong while loading the contact.", "danger");
         }
-
     }
 
     private async Task HandleSubmit(ContactDTO contact)
     {
         if (userInfo is not null)
         {
-            //call service to update contact
-            await ContactService.UpdateContactAsync(contact, userInfo.UserId);
+            try
+            {
+                await ContactService.UpdateContactAsync(contact, userInfo.UserId);
 
-            //navigate back to index page
-            Nav.NavigateTo("/contacts");
+                ToastNavigationHelper.NavigateWithToast(Nav, "/contacts", "Contact successfully updated.", "success");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                ToastNavigationHelper.NavigateWithToast(Nav, "/contacts", "Something went wrong while updating the contact.", "danger");
+            }
         }
     }
 }

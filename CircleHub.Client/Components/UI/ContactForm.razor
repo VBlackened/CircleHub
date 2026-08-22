@@ -61,13 +61,29 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-6">
-                        <label for="" class="form-label">Categories</label>
-                        <InputSelect @bind-Value="_selectedCategoryIds" class="form-select">
+                            <label class="form-label mb-2">Categories</label>
+                        <div class="d-flex flex-wrap gap-2 mt-1 category-picker">
                             @foreach (CategoryDTO category in _categories)
                             {
-                                <option value="@category.Id">@category.Name</option>
+                                bool selected = _selectedCategoryIds.Contains(category.Id);
+
+                                <button type="button"
+                                        class="btn btn-sm rounded-pill shadow-sm @(selected ? "btn-primary" : "btn-outline-primary")"
+                                        @onclick="() => ToggleCategory(category.Id)">
+
+                                    @if (selected)
+                                    {
+                                        <i class="bi bi-check2 me-1"></i>
+                                    }
+
+                                    @category.Name
+                                </button>
                             }
-                        </InputSelect>
+                        </div>
+                        <div class="form-text mt-2">
+                            @_selectedCategoryIds.Length
+                            @(_selectedCategoryIds.Length == 1 ? "category selected" : "categories selected")
+                        </div>
                     </div>
                     <div class="col-12 col-lg-6">
                         <label for="Contact.BrithDate" class="form-label">Birthday</label>
@@ -123,7 +139,7 @@
     {
         _imageError = null;
 
-        if(changeEvent.File is null)
+        if (changeEvent.File is null)
         {
             _selectedImage = null;
             Contact!.ProfileImageUrl = BrowserFileHelper.DefaultContactImage;
@@ -144,6 +160,20 @@
                 _imageError = "An error occurred while processing the image. Please try again.";
                 Console.WriteLine(ex);
             }
+        }
+    }
+
+    private void ToggleCategory(int categoryId)
+    {
+        if (_selectedCategoryIds.Contains(categoryId))
+        {
+            _selectedCategoryIds = _selectedCategoryIds
+                    .Where(id => id != categoryId)
+                    .ToArray();
+        }
+        else
+        {
+            _selectedCategoryIds = [.. _selectedCategoryIds, categoryId];
         }
     }
 

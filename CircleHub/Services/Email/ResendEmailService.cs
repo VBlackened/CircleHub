@@ -12,7 +12,11 @@ public class ResendEmailService(IResend _resend, IOptions<ResendOptions> _option
     {
         var message = new EmailMessage
         {
-            From = _options.Value.From,
+            From = new EmailAddress
+            {
+                Email = _options.Value.ContactFrom,
+                DisplayName = request.FromName
+            },
             To = EmailAddressList.From(request.Recipients),
             Subject = request.Subject,
             HtmlBody = request.HtmlBody

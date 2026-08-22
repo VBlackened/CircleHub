@@ -1,0 +1,10 @@
+.login-card {
+    margin: auto;
+    max-width: 576px;
+    flex-grow: 1;
+    padding: 1rem;
+}
+
+.login-card .card-header {
+    background-color: var(--cf-theme-700);
+}

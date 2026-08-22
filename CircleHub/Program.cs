@@ -38,7 +38,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DbConnection") ?? throw new InvalidOperationException("Connection string 'DbConnection' not found.");
+var connectionString = DataUtility.GetConnectionString(builder.Configuration) ?? throw new InvalidOperationException("Connection string 'DbConnection' not found.");
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -55,7 +55,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.AddOptions<ResendOptions>()
     .Bind(builder.Configuration.GetSection(ResendOptions.SectionName))
     .Validate(o => !string.IsNullOrWhiteSpace(o.ApiKey), "Resend ApiKey is missing.")
-    .Validate(o => !string.IsNullOrWhiteSpace(o.From), "Resend From address is missing.")
+    .Validate(o => !string.IsNullOrWhiteSpace(o.SystemFrom), "Resend SystemFrom address is missing.")
+    .Validate(o => !string.IsNullOrWhiteSpace(o.ContactFrom), "Resend ContactFrom address is missing.")
     .ValidateOnStart();
 
 var resendOptions = builder.Configuration

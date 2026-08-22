@@ -1,13 +1,15 @@
 ﻿using CircleHub.Client.Models;
 using CircleHub.Client.Services.Interfaces;
+using CircleHub.Data;
 using CircleHub.Models;
 using CircleHub.Services.Email;
 using CircleHub.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Resend;
 
 namespace CircleHub.Services;
 
-public class CategoryDTOService(ICategoryRepository repository, IEmailService emailService) : ICategoryDTOService
+public class CategoryDTOService(ICategoryRepository repository, IEmailService emailService, UserManager<ApplicationUser> _userManager) : ICategoryDTOService
 {
     public async Task<CategoryDTO> CreateCategoryAsync(CategoryDTO category, string userId)
     {
@@ -64,6 +66,13 @@ public class CategoryDTOService(ICategoryRepository repository, IEmailService em
 
         try
         {
+            ApplicationUser? user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+            {
+                return false;
+            }
+
             var request = new EmailRequest
             {
                 Recipients = emailData.Recipients,
@@ -71,7 +80,8 @@ public class CategoryDTOService(ICategoryRepository repository, IEmailService em
                 HtmlBody = $"""
                 <p>{emailData.Body.Replace("\n", "<br>")}</p>
                 """,
-                ReplyToEmail = emailData.ReplyToEmail
+                ReplyToEmail = emailData.ReplyToEmail,
+                FromName = $"{user.FirstName} {user.LastName} by CircleHub"
             };
 
             await emailService.SendEmailAsync(request);

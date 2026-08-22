@@ -1,0 +1,15 @@
+.register-card {
+    margin: auto;
+    max-width: 570px;
+    flex-grow: 1;
+    padding: 1rem;
+}
+
+    .register-card .card-header {
+        background-color: var(--cf-theme-700);
+    }
+
+#profilePicPreview {
+    height: 6rem;
+}
+

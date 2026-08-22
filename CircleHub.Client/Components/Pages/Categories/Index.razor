@@ -38,6 +38,9 @@
     [SupplyParameterFromQuery]
     private string? Message { get; set; }
 
+    [SupplyParameterFromQuery]
+    private string? MessageType { get; set; }
+
     private UserInfo? _userInfo;
 
     private CategoryDTO _newCategory = new CategoryDTO();
@@ -58,9 +61,14 @@
     {
         if (!string.IsNullOrEmpty(Message)) 
         {
-            ShowToastMessage(Message);
+            ShowToastMessage(Message, MessageType ?? "success");
 
-            var uri = Nav.GetUriWithQueryParameter("message", (string?)null);
+            Dictionary<string, object?> queryParams = new()
+            {
+                { "message", null },
+                { "messageType", null }
+            };
+            var uri = Nav.GetUriWithQueryParameters(queryParams);
             Nav.NavigateTo(uri, replace: true);
         }
     }
@@ -71,34 +79,26 @@
         _newCategory = new CategoryDTO();
 
         _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
-        ShowToastMessage("Category created successfully!");
+        ShowToastMessage("Category created successfully!", "success");
     }
 
     private async Task UpdateCategory(CategoryDTO category)
     {
         await CategoryService.UpdateCategoryAsync(category, _userInfo!.UserId);
-        ShowToastMessage("Category updated successfully!");
+        ShowToastMessage("Category updated successfully!", "success");
     }
 
     private async Task DeleteCategory(int categoryId)
     {
         await CategoryService.DeleteCategoryAsync(categoryId, _userInfo!.UserId);
         _categories = await CategoryService.GetCategoriesAsync(_userInfo!.UserId);
-        ShowToastMessage("Category deleted successfully!");
+        ShowToastMessage("Category deleted successfully!", "success");
     }
 
-    private void ShowToastMessage(string message)
+    private void ShowToastMessage(string message, string color)
     {
         _toastMessage = message;
-
-        if (message.Contains("wrong"))
-        {
-            _messageColor = "danger";
-        }
-        else
-        {
-            _messageColor = "success";
-        }
+        _messageColor = color;
         _messageId = Guid.NewGuid();
     }
 }

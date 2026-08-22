@@ -71,17 +71,20 @@
 </div>
 
 @code {
-        [CascadingParameter]
-        private Task<AuthenticationState>? AuthStateTask { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-        [SupplyParameterFromQuery]
-        private int? CategoryId { get; set; }
+    [SupplyParameterFromQuery]
+    private int? CategoryId { get; set; }
 
-        [SupplyParameterFromQuery]
-        private string? SearchTerm { get; set; }
+    [SupplyParameterFromQuery]
+    private string? SearchTerm { get; set; }
 
-        [SupplyParameterFromQuery]
-        private string? Message { get; set; }
+    [SupplyParameterFromQuery]
+    private string? Message { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? MessageType { get; set; }
 
     private UserInfo? _userInfo;
 
@@ -113,22 +116,27 @@
         _userInfo ??= await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
         _searchInput = SearchTerm;
 
-        if (!string.IsNullOrEmpty(Message)) 
+        if (!string.IsNullOrEmpty(Message))
         {
-            ShowToastMessage(Message);
+            ShowToastMessage(Message, MessageType ?? "success");
 
-            var uri = Nav.GetUriWithQueryParameter("message", (string?)null);
+            Dictionary<string, object?> queryParams = new()
+            {
+                { "message", null },
+                { "messageType", null }
+            };
+            var uri = Nav.GetUriWithQueryParameters(queryParams);
             Nav.NavigateTo(uri, replace: true);
         }
 
         try
         {
-            if(!string.IsNullOrWhiteSpace(SearchTerm))
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
                 CategoryId = null;
                 _contacts = await ContactService.SearchContactsAsync(SearchTerm, _userInfo!.UserId);
-            } 
-            else if (CategoryId.HasValue) 
+            }
+            else if (CategoryId.HasValue)
             {
                 SearchTerm = null;
                 _contacts = await ContactService.GetContactsByCategoryAsync(CategoryId.Value, _userInfo!.UserId);
@@ -142,7 +150,7 @@
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            ShowToastMessage("Something went wrong while loading the contacts.");
+            ShowToastMessage("Something went wrong while loading the contacts.", "danger");
         }
     }
 
@@ -177,27 +185,19 @@
             await ContactService.DeleteContactAsync(Id, _userInfo!.UserId);
             _contacts = _contacts.Where(c => c.Id != Id);
 
-            ShowToastMessage("Contact succesfully deleted.");
+            ShowToastMessage("Contact succesfully deleted.", "success");
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            ShowToastMessage("Something went wrong while deleting the contact.");
+            ShowToastMessage("Something went wrong while deleting the contact.", "danger");
         }
     }
 
-    private void ShowToastMessage(string message)
+    private void ShowToastMessage(string message, string color)
     {
         _toastMessage = message;
-
-        if (message.Contains("wrong"))
-        {
-            _messageColor = "danger";
-        }
-        else
-        {
-            _messageColor = "success";
-        }
+        _messageColor = color;
         _messageId = Guid.NewGuid();
     }
 }
