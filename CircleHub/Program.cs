@@ -5,6 +5,7 @@ using CircleHub.Components.Account;
 using CircleHub.Configuration;
 using CircleHub.Data;
 using CircleHub.Services;
+using CircleHub.Services.DemoUser;
 using CircleHub.Services.Email;
 using CircleHub.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -26,7 +27,13 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 //builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
-builder.Services.AddControllers();
+builder.Services.AddScoped<DemoUserActivityFilter>();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<DemoUserActivityFilter>();
+});
+
 builder.Services.AddHttpClient();
 
 builder.Services.AddOutputCache();
@@ -81,6 +88,12 @@ builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<ICategoryDTOService, CategoryDTOService>();
 builder.Services.AddScoped<IContactDTOService, ContactDTOService>();
 
+//Demo User Service
+builder.Services.AddScoped<IDemoUserService, DemoUserService>();
+builder.Services.AddScoped<IDemoUserActivityService, DemoUserActivityService>();
+
+// Demo User Cleanup
+builder.Services.AddHostedService<DemoUserCleanupService>();
 
 var app = builder.Build();
 
