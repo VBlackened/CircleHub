@@ -1,7 +1,6 @@
 ﻿using CircleHub.Data;
 using CircleHub.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 

@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Bogus;
-using CircleHub.Models;
 
-namespace CircleHub.Data;
+namespace CircleHub.Data; 
 
 public class DataUtility
 {
     public static string GetConnectionString(IConfiguration config)
     {
         var connectionString = config.GetConnectionString("DbConnection"); //Local connection string
-        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PRIVATE_URL"); //Railway connection string
+        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL"); //Railway connection string
 
         return string.IsNullOrEmpty(databaseUrl) ? connectionString! : BuildConnectionString(databaseUrl);
     }

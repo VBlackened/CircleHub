@@ -1,6 +1,5 @@
 ﻿using CircleHub.Client.Models;
 using CircleHub.Client.Services.Interfaces;
-using CircleHub.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;

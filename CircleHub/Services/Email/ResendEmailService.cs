@@ -1,5 +1,4 @@
 ﻿using CircleHub.Configuration;
-using CircleHub.Data;
 using CircleHub.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using Resend;

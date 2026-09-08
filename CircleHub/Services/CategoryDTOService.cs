@@ -5,7 +5,6 @@ using CircleHub.Models;
 using CircleHub.Services.Email;
 using CircleHub.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Resend;
 
 namespace CircleHub.Services;
 
